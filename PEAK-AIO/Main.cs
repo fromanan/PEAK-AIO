@@ -11,7 +11,7 @@ using Vector4 = System.Numerics.Vector4;
 using Vector2 = System.Numerics.Vector2;
 
 [BepInDependency(Metadata.GUID)]
-[BepInPlugin("com.onigremlin.peakaio", "PEAK AIO Mod", "1.0.2")]
+[BepInPlugin("com.onigremlin.peakaio", "PEAK AIO Mod", "1.0.3")]
 public class PeakMod : BaseUnityPlugin
 {
     #region Data Members
@@ -819,7 +819,7 @@ public class PeakMod : BaseUnityPlugin
 
                         ImGui.Text("PEAK AIO Mod");
                         ImGui.Separator();
-                        ImGui.Text("Version: 1.0.2");
+                        ImGui.Text("Version: 1.0.3");
                         ImGui.Text("Author: OniGremlin");
 
                         ImGui.Spacing();
