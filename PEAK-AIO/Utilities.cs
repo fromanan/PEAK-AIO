@@ -4,41 +4,53 @@ using Photon.Pun;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zorro.Core.Serizalization;
+using Object = UnityEngine.Object;
 
 public static class Utilities
 {
     public static ManualLogSource Logger;
 
+    public static bool HasInitializedLuggageList;
+
+    private static bool NoPlayer => Globals.PlayerObject is null || !Globals.PlayerObject;
+
+    private static ItemSlot[] ItemSlots => Globals.PlayerObject.itemSlots;
+
+    private static bool HasSlot(int slot) => ItemSlots is { } itemSlots && itemSlots.Length > slot;
+
     public static void GetPlayer()
     {
-        if (Globals.playerObj == null)
-            Globals.playerObj = Player.localPlayer;
+        if (NoPlayer)
+        {
+            Globals.PlayerObject = Player.localPlayer;
+        }
     }
 
     public static void UpdateItems()
     {
         UnityMainThreadDispatcher.Enqueue(() =>
         {
-            Globals.items.Clear();
-            Globals.itemNames.Clear();
-            for (int i = 0; i < 3; i++) Globals.selectedItems[i] = -1;
+            Globals.Items.Clear();
+            Globals.ItemNames.Clear();
 
-            UnityEngine.Object[] allItems = Resources.FindObjectsOfTypeAll(typeof(Item));
-
-            foreach (var obj in allItems)
+            for (int i = 0; i < 3; i++)
             {
-                var item = obj as Item;
-                if (item != null && item.gameObject.scene.handle == 0 && string.IsNullOrEmpty(item.gameObject.scene.name))
-                {
-                    Globals.items.Add(item);
-                    Globals.itemNames.Add(item.GetName());
-                }
+                Globals.SelectedItems[i] = -1;
+            }
+
+            Object[] allItems = Resources.FindObjectsOfTypeAll(typeof(Item));
+
+            foreach (Object obj in allItems)
+            {
+                if (obj is not Item item || item.gameObject.scene.handle != 0 || !string.IsNullOrEmpty(item.gameObject.scene.name))
+                    continue;
+                
+                Globals.Items.Add(item);
+                Globals.ItemNames.Add(item.GetName());
             }
         });
     }
@@ -47,92 +59,91 @@ public static class Utilities
     {
         GetPlayer();
 
-        if (Globals.playerObj == null)
+        if (NoPlayer)
         {
             Logger.LogError("[PEAK AIO] Player is null during inventory operation");
             return;
         }
 
-        if (Globals.playerObj != null &&
-            Globals.playerObj.itemSlots != null &&
-            Globals.playerObj.itemSlots.Length > slot &&
-            itemIndex >= 0 && itemIndex < Globals.items.Count)
+        if (NoPlayer || !HasSlot(slot) || itemIndex < 0 || itemIndex >= Globals.Items.Count)
+            return;
+        
+        UnityMainThreadDispatcher.Enqueue(() =>
         {
-            UnityMainThreadDispatcher.Enqueue(() =>
-            {
-                var slotData = Globals.playerObj.itemSlots[slot];
-                slotData.prefab = Globals.items[itemIndex];
-                slotData.data = new ItemInstanceData(Guid.NewGuid());
-                ItemInstanceDataHandler.AddInstanceData(slotData.data);
+            ItemSlot slotData = ItemSlots[slot];
+            slotData.prefab = Globals.Items[itemIndex];
+            slotData.data = new ItemInstanceData(Guid.NewGuid());
+            ItemInstanceDataHandler.AddInstanceData(slotData.data);
 
-                byte[] syncData = IBinarySerializable.ToManagedArray<InventorySyncData>(
-                    new InventorySyncData(
-                        Globals.playerObj.itemSlots,
-                        Globals.playerObj.backpackSlot,
-                        Globals.playerObj.tempFullSlot
-                    )
-                );
+            byte[] syncData = IBinarySerializable.ToManagedArray(
+                new InventorySyncData(
+                    ItemSlots,
+                    Globals.PlayerObject.backpackSlot,
+                    Globals.PlayerObject.tempFullSlot
+                )
+            );
 
-                Globals.playerObj.photonView.RPC("SyncInventoryRPC", RpcTarget.Others, new object[] { syncData, true });
-            });
-            Logger.LogInfo($"[Inventory] Assigned {Globals.itemNames[itemIndex]} to slot {slot}");
-        }
+            Globals.PlayerObject.photonView.RPC("SyncInventoryRPC", RpcTarget.Others, syncData, true);
+        });
+        
+        Logger.LogInfo($"[Inventory] Assigned {Globals.ItemNames[itemIndex]} to slot {slot}");
     }
 
     public static void RechargeInventorySlot(int slot, float rechargeValue)
     {
         GetPlayer();
 
-        if (Globals.playerObj == null)
+        if (Globals.PlayerObject is null)
         {
             Logger.LogError("[PEAK AIO] Player is null during inventory operation");
             return;
         }
 
-        if (Globals.playerObj != null &&
-            Globals.playerObj.itemSlots != null &&
-            Globals.playerObj.itemSlots.Length > slot)
+        if (NoPlayer || HasSlot(slot))
+            return;
+
+        UnityMainThreadDispatcher.Enqueue(() =>
         {
-            UnityMainThreadDispatcher.Enqueue(() =>
+            if (ItemSlots[slot]?.data?.data is not { } data)
+                return;
+
+            foreach (KeyValuePair<DataEntryKey, DataEntryValue> kvp in data)
             {
-                var itemSlot = Globals.playerObj.itemSlots[slot];
-                if (itemSlot?.data?.data != null)
+                switch (kvp.Key)
                 {
-                    foreach (var kvp in itemSlot.data.data)
+                    case DataEntryKey.PetterItemUses:
                     {
-                        if (kvp.Key == DataEntryKey.PetterItemUses)
+                        if (kvp.Value is IntItemData intData)
                         {
-                            if (kvp.Value is IntItemData intData)
-                            {
-                                intData.Value = (int)rechargeValue;
-                            }
+                            intData.Value = (int)rechargeValue;
                         }
-                        else if (kvp.Key == DataEntryKey.Fuel)
+
+                        break;
+                    }
+                    case DataEntryKey.Fuel:
+                    case DataEntryKey.UseRemainingPercentage:
+                    {
+                        if (kvp.Value is FloatItemData floatData)
                         {
-                            if (kvp.Value is FloatItemData floatData)
-                            {
-                                floatData.Value = rechargeValue;
-                            }
+                            floatData.Value = rechargeValue;
                         }
-                        else if (kvp.Key == DataEntryKey.UseRemainingPercentage)
+
+                        break;
+                    }
+                    case DataEntryKey.ItemUses:
+                    {
+                        if (kvp.Value is OptionableIntItemData intData)
                         {
-                            if (kvp.Value is FloatItemData floatData)
-                            {
-                                floatData.Value = rechargeValue;
-                            }
+                            intData.Value = (int)rechargeValue;
                         }
-                        else if (kvp.Key == DataEntryKey.ItemUses)
-                        {
-                            if (kvp.Value is OptionableIntItemData intData)
-                            {
-                                intData.Value = (int)rechargeValue;
-                            }
-                        }
+
+                        break;
                     }
                 }
-            });
-            Logger.LogInfo($"[Inventory] Recharged slot {slot} to {rechargeValue}");
-        }
+            }
+        });
+        
+        Logger.LogInfo($"[Inventory] Recharged slot {slot} to {rechargeValue}");
     }
 
     public static void RefreshPlayerList()
@@ -141,20 +152,21 @@ public static class Utilities
         {
             try
             {
-                Globals.allPlayers.Clear();
-                Globals.playerNames.Clear();
-                Globals.selectedPlayer = -1;
+                Globals.AllPlayers.Clear();
+                Globals.PlayerNames.Clear();
+                Globals.SelectedPlayer = -1;
 
-                foreach (var character in Character.AllCharacters)
+                foreach (Character character in Character.AllCharacters)
                 {
-                    Globals.allPlayers.Add(character);
-                    Globals.playerNames.Add(character.characterName);
+                    Globals.AllPlayers.Add(character);
+                    Globals.PlayerNames.Add(character.characterName);
                 }
-                Logger.LogInfo($"[PlayerList] Found {Globals.allPlayers.Count} players.");
+
+                Logger.LogInfo($"[PlayerList] Found {Globals.AllPlayers.Count} players.");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
         });
     }
@@ -163,13 +175,12 @@ public static class Utilities
     {
         UnityMainThreadDispatcher.Enqueue(() =>
         {
-            foreach (var character in Character.AllCharacters)
+            foreach (Character character in Character.AllCharacters)
             {
-                Vector3 revivePos = character.Ghost != null ? character.Ghost.transform.position : character.Head;
-                character.photonView.RPC("RPCA_ReviveAtPosition", RpcTarget.All, new object[] {
-                revivePos + new Vector3(0f, 4f, 0f), false
-            });
+                Vector3 revivePos = character.Ghost ? character.Ghost.transform.position : character.Head;
+                character.photonView.RPC("RPCA_ReviveAtPosition", RpcTarget.All, revivePos + new Vector3(0f, 4f, 0f), false);
             }
+
             Logger.LogInfo("[Lobby] Revive All triggered.");
         });
     }
@@ -178,16 +189,16 @@ public static class Utilities
     {
         UnityMainThreadDispatcher.Enqueue(() =>
         {
-            foreach (var character in Character.AllCharacters)
+            foreach (Character character in Character.AllCharacters)
             {
-                if (Globals.excludeSelfFromAllActions && character.IsLocal)
+                if (Globals.ExcludeSelfFromAllActions && character.IsLocal)
                     continue;
 
                 Vector3 pos = character.transform.position;
-                character.photonView.RPC("RPCA_Die", RpcTarget.All, new object[] { pos });
+                character.photonView.RPC("RPCA_Die", RpcTarget.All, pos);
             }
 
-            Logger.LogInfo($"[Lobby] Kill All triggered. ExcludeSelf: {Globals.excludeSelfFromAllActions}");
+            Logger.LogInfo($"[Lobby] Kill All triggered. ExcludeSelf: {Globals.ExcludeSelfFromAllActions}");
         });
     }
 
@@ -196,101 +207,100 @@ public static class Utilities
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             Vector3 myPos = Character.localCharacter.Head + new Vector3(0f, 4f, 0f);
-            foreach (var character in Character.AllCharacters)
+            foreach (Character character in Character.AllCharacters)
             {
-                character.photonView.RPC("WarpPlayerRPC", RpcTarget.All, new object[] { myPos, true });
+                character.photonView.RPC("WarpPlayerRPC", RpcTarget.All, myPos, true);
             }
+
             Logger.LogInfo("[Lobby] Warp All To Me triggered.");
         });
     }
 
+    private static bool NoPlayers => Globals.SelectedPlayer < 0 || Globals.SelectedPlayer >= Globals.AllPlayers.Count;
+
+    private static Character SelectedPlayer => Globals.AllPlayers[Globals.SelectedPlayer];
 
     public static void ReviveSelectedPlayer()
     {
-        if (Globals.selectedPlayer < 0 || Globals.selectedPlayer >= Globals.allPlayers.Count)
+        if (NoPlayers)
             return;
 
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             try
             {
-                var target = Globals.allPlayers[Globals.selectedPlayer];
-                Vector3 revivePos = target.Ghost != null ? target.Ghost.transform.position : target.Head;
-                target.photonView.RPC("RPCA_ReviveAtPosition", RpcTarget.All, new object[] {
-                revivePos + new Vector3(0f, 4f, 0f), false
-            });
-                Logger.LogInfo($"[Lobby] Revive requested for player index {Globals.selectedPlayer}");
+                Character target = SelectedPlayer;
+                Vector3 revivePos = target.Ghost ? target.Ghost.transform.position : target.Head;
+                target.photonView.RPC("RPCA_ReviveAtPosition", RpcTarget.All, revivePos + new Vector3(0f, 4f, 0f),
+                    false);
+                Logger.LogInfo($"[Lobby] Revive requested for player index {Globals.SelectedPlayer}");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
         });
     }
 
     public static void KillSelectedPlayer()
     {
-        if (Globals.selectedPlayer < 0 || Globals.selectedPlayer >= Globals.allPlayers.Count)
+        if (NoPlayers)
             return;
 
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             try
             {
-                var target = Globals.allPlayers[Globals.selectedPlayer];
+                Character target = SelectedPlayer;
                 Vector3 spawnPoint = target.transform.position; // or any desired location
-                target.photonView.RPC("RPCA_Die", RpcTarget.All, new object[] { spawnPoint });
-                Logger.LogInfo($"[Lobby] Kill requested for player index {Globals.selectedPlayer}");
+                target.photonView.RPC("RPCA_Die", RpcTarget.All, spawnPoint);
+                Logger.LogInfo($"[Lobby] Kill requested for player index {Globals.SelectedPlayer}");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
         });
     }
 
     public static void WarpToSelectedPlayer()
     {
-        if (Globals.selectedPlayer < 0 || Globals.selectedPlayer >= Globals.allPlayers.Count)
+        if (NoPlayers)
             return;
 
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             try
             {
-                var target = Globals.allPlayers[Globals.selectedPlayer];
+                Character target = SelectedPlayer;
                 Vector3 targetPos = target.Head + new Vector3(0f, 4f, 0f);
-                Character.localCharacter.photonView.RPC("WarpPlayerRPC", RpcTarget.All, new object[] {
-                targetPos, true
-            });
-                Logger.LogInfo($"[Lobby] Warp to requested for player index {Globals.selectedPlayer}");
+                Character.localCharacter.photonView.RPC("WarpPlayerRPC", RpcTarget.All, targetPos, true);
+                Logger.LogInfo($"[Lobby] Warp to requested for player index {Globals.SelectedPlayer}");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
         });
     }
 
     public static void WarpSelectedPlayerToMe()
     {
-        if (Globals.selectedPlayer < 0 || Globals.selectedPlayer >= Globals.allPlayers.Count)
+        if (NoPlayers)
             return;
 
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             try
             {
-                var target = Globals.allPlayers[Globals.selectedPlayer];
+                Character target = SelectedPlayer;
                 Vector3 myHead = Character.localCharacter.Head + new Vector3(0f, 4f, 0f);
-                target.photonView.RPC("WarpPlayerRPC", RpcTarget.All, new object[] {
-                myHead, true
-            });
-                Logger.LogInfo($"[Lobby] Warp to me requested for player index {Globals.selectedPlayer}");
+                target.photonView.RPC("WarpPlayerRPC", RpcTarget.All, myHead, true);
+                Logger.LogInfo($"[Lobby] Warp to me requested for player index {Globals.SelectedPlayer}");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
         });
     }
@@ -301,74 +311,63 @@ public static class Utilities
         {
             try
             {
-                Character localCharacter = Character.localCharacter;
-                if (localCharacter == null || localCharacter.data.dead)
+                if (Character.localCharacter is not { } localCharacter || localCharacter.data.dead)
                 {
                     Logger.LogWarning("[Teleport] Local character is null or dead. Aborting teleport.");
                     return;
                 }
 
-                PhotonView photonView = localCharacter.photonView;
-                if (photonView == null)
+                if (localCharacter.photonView is not { } photonView)
                     return;
 
-                Vector3 target = new Vector3(x, y, z);
-                photonView.RPC("WarpPlayerRPC", RpcTarget.All, new object[]
-                {
-                target, true
-                });
+                var target = new Vector3(x, y, z);
+                photonView.RPC("WarpPlayerRPC", RpcTarget.All, target, true);
 
-                ConfigManager.Logger.LogInfo($"[Teleport] Teleported to {target}");
+                Logger.LogInfo($"[Teleport] Teleported to {target}");
             }
             catch (Exception ex)
             {
-                ConfigManager.Logger.LogError("[Teleport] Exception: " + ex);
+                Logger.LogError("[Teleport] Exception: " + ex);
             }
         });
     }
 
-    public static bool hasInitializedLuggageList = false;
-
     public static void EnsureLuggageListInitialized()
     {
-        if (!hasInitializedLuggageList)
-        {
-            hasInitializedLuggageList = true;
-            RefreshLuggageList();
-        }
+        if (HasInitializedLuggageList)
+            return;
+        HasInitializedLuggageList = true;
+        RefreshLuggageList();
     }
-
 
     public static void RefreshLuggageList()
     {
-        Globals.luggageLabels.Clear();
-        Globals.luggageObject.Clear();
-        Globals.selectedLuggageIndex = -1;
+        Globals.LuggageLabels.Clear();
+        Globals.LuggageObjects.Clear();
+        Globals.SelectedLuggageIndex = -1;
 
         var allLuggage = new List<(Luggage lug, float distance)>();
 
-        foreach (var lug in Luggage.ALL_LUGGAGE)
+        foreach (Luggage luggage in Luggage.ALL_LUGGAGE.Where(l => l is not null))
         {
-            if (lug == null) continue;
-
-            float distance = Vector3.Distance(Character.localCharacter.Head, lug.Center());
+            float distance = Vector3.Distance(Character.localCharacter.Head, luggage.Center());
             if (distance <= 300)
             {
-                allLuggage.Add((lug, distance));
+                allLuggage.Add((luggage, distance));
             }
         }
 
         // Sort by distance (closest first)
         allLuggage.Sort((a, b) => a.distance.CompareTo(b.distance));
 
-        foreach (var (lug, distance) in allLuggage)
+        foreach ((Luggage lug, float distance) in allLuggage)
         {
             string name = lug.displayName ?? "Unnamed";
-            Globals.luggageLabels.Add($"{name} [{distance:F1}m]");
-            Globals.luggageObject.Add(lug);
+            Globals.LuggageLabels.Add($"{name} [{distance:F1}m]");
+            Globals.LuggageObjects.Add(lug);
         }
 
-        Logger.LogInfo($"[Luggage] Refreshed. Found {Globals.luggageLabels.Count} nearby.");
+        Logger.LogInfo($"[Luggage] Refreshed. Found {Globals.LuggageLabels.Count} nearby.");
     }
 
     public static void OpenAllNearbyLuggage()
@@ -377,17 +376,12 @@ public static class Utilities
         {
             int opened = 0;
 
-            for (int i = 0; i < Globals.luggageObject.Count; i++)
+            foreach (Luggage luggage in Globals.LuggageObjects)
             {
-                var luggage = Globals.luggageObject[i];
-                if (luggage == null) continue;
-
-                var view = luggage.GetComponent<PhotonView>();
-                if (view != null)
-                {
-                    view.RPC("OpenLuggageRPC", RpcTarget.All, new object[] { true });
-                    opened++;
-                }
+                if (luggage?.GetComponent<PhotonView>() is not { } view)
+                    continue;
+                view.RPC("OpenLuggageRPC", RpcTarget.All, true);
+                opened++;
             }
 
             Logger.LogInfo($"[Luggage] Requested open for {opened} nearby containers.");
@@ -396,23 +390,20 @@ public static class Utilities
 
     public static void OpenLuggage(int index)
     {
-        if (index < 0 || index >= Globals.luggageObject.Count)
+        if (index < 0 || index >= Globals.LuggageObjects.Count)
             return;
 
-        var luggage = Globals.luggageObject[index];
-        if (luggage == null)
+        if (Globals.LuggageObjects[index] is not { } luggage)
             return;
 
         UnityMainThreadDispatcher.Enqueue(() =>
         {
             try
             {
-                PhotonView view = luggage.GetComponent<PhotonView>();
-                if (view != null)
-                {
-                    view.RPC("OpenLuggageRPC", RpcTarget.All, new object[] { true });
-                    Logger.LogInfo($"[Luggage] Sent OpenLuggageRPC for: {luggage.displayName}");
-                }
+                if (luggage.GetComponent<PhotonView>() is not { } view)
+                    return;
+                view.RPC("OpenLuggageRPC", RpcTarget.All, true);
+                Logger.LogInfo($"[Luggage] Sent OpenLuggageRPC for: {luggage.displayName}");
             }
             catch (Exception ex)
             {
@@ -439,7 +430,8 @@ public static class Utilities
 
             Character targetCharacter = Character.AllCharacters[playerIndex];
             Vector3 targetPos = targetCharacter.transform.position;
-            Vector3 spawnOrigin = targetPos + new Vector3(UnityEngine.Random.Range(-10f, 10f), 25f, UnityEngine.Random.Range(-10f, 10f));
+            Vector3 spawnOrigin = targetPos + new Vector3(UnityEngine.Random.Range(-10f, 10f), 25f,
+                UnityEngine.Random.Range(-10f, 10f));
             Vector3 down = Vector3.down;
 
             if (Physics.Raycast(spawnOrigin, down, out RaycastHit hit, 100f, ~0))
@@ -447,33 +439,33 @@ public static class Utilities
                 Vector3 spawnPoint = hit.point + Vector3.up * 1f;
                 Quaternion rotation = Quaternion.identity;
 
-                GameObject scoutObj = PhotonNetwork.InstantiateRoomObject("Character_Scoutmaster", spawnPoint, rotation, 0, null);
-                var character = scoutObj.GetComponent<Character>();
-                if (character != null)
+                GameObject scoutObj = PhotonNetwork.InstantiateRoomObject("Character_Scoutmaster", spawnPoint, rotation);
+                if (scoutObj.GetComponent<Character>() is { } character)
+                {
                     character.data.spawnPoint = character.transform;
+                }
 
                 await Task.Delay(100);
 
-                var scoutmaster = scoutObj.GetComponent<Scoutmaster>();
-                if (scoutmaster != null)
+                if (scoutObj.GetComponent<Scoutmaster>() is not { } scoutmaster)
+                    return;
+                try
                 {
-                    try
+                    var method = typeof(Scoutmaster).GetMethod("SetCurrentTarget",
+                        BindingFlags.Instance | BindingFlags.NonPublic);
+                    if (method is not null)
                     {
-                        var method = typeof(Scoutmaster).GetMethod("SetCurrentTarget", BindingFlags.Instance | BindingFlags.NonPublic);
-                        if (method != null)
-                        {
-                            method.Invoke(scoutmaster, new object[] { targetCharacter, 15f });
-                            Logger.LogInfo($"[Scoutmaster] Target set to {targetCharacter.characterName}");
-                        }
-                        else
-                        {
-                            Logger.LogWarning("[Scoutmaster] Reflection failed — method not found.");
-                        }
+                        method.Invoke(scoutmaster, new object[] { targetCharacter, 15f });
+                        Logger.LogInfo($"[Scoutmaster] Target set to {targetCharacter.characterName}");
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Logger.LogError("[Scoutmaster] Reflection error: " + ex);
+                        Logger.LogWarning("[Scoutmaster] Reflection failed — method not found.");
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError($"[Scoutmaster] Reflection error: {ex}");
                 }
             }
             else

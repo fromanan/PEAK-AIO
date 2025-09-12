@@ -2,129 +2,133 @@
 
 internal static class ConstantFields
 {
-    private static PropertyInfo infiniteStaminaProp;
-    private static PropertyInfo statusLockProp;
-    private static FieldInfo fallDamageTimeField;
-    private static FieldInfo staminaField;
-    private static FieldInfo movementModifierField;
-    private static FieldInfo jumpGravityField;
-    private static FieldInfo climbSpeedModField;
-    private static FieldInfo vineClimbSpeedModField;
-    private static FieldInfo ropeClimbSpeedModField;
-    private static MethodInfo setStatusMethod;
-    private static System.Array statusEnumValues;
+    private static PropertyInfo _infiniteStaminaProp;
+
+    private static PropertyInfo _statusLockProp;
+
+    private static FieldInfo _fallDamageTimeField;
+
+    private static FieldInfo _staminaField;
+
+    private static FieldInfo _movementModifierField;
+
+    private static FieldInfo _jumpGravityField;
+
+    private static FieldInfo _climbSpeedModField;
+
+    private static FieldInfo _vineClimbSpeedModField;
+
+    private static FieldInfo _ropeClimbSpeedModField;
+
+    private static MethodInfo _setStatusMethod;
+
+    private static System.Array _statusEnumValues;
+
+    private const BindingFlags InstanceBindingFlags =
+        BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+    private static class PropertyNames
+    {
+        public const string InfiniteStamina = "infiniteStam";
+        public const string StatusesLocked = "statusesLocked";
+    }
+
+    private static class FieldNames
+    {
+        public const string FallDamageTime = "fallDamageTime";
+        public const string Stamina = "_stam";
+        public const string MovementModifier = "movementModifier";
+        public const string JumpGravity = "jumpGravity";
+        public const string ClimbingSpeedModifier = "climbSpeedMod";
+    }
+
+    private static class MethodNames
+    {
+        public const string SetStatus = "SetStatus";
+    }
 
     public static PropertyInfo GetInfiniteStaminaProperty()
     {
-        if (infiniteStaminaProp == null)
-        {
-            infiniteStaminaProp = typeof(Character).GetProperty("infiniteStam", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return infiniteStaminaProp;
+        return _infiniteStaminaProp ??= typeof(Character).GetProperty(PropertyNames.InfiniteStamina,
+            InstanceBindingFlags);
     }
 
     public static PropertyInfo GetStatusLockProperty()
     {
-        if (statusLockProp == null)
-        {
-            statusLockProp = typeof(Character).GetProperty("statusesLocked", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return statusLockProp;
+        return _statusLockProp ??= typeof(Character).GetProperty(PropertyNames.StatusesLocked,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetFallDamageTimeField()
     {
-        if (fallDamageTimeField == null)
-        {
-            fallDamageTimeField = typeof(CharacterMovement).GetField("fallDamageTime", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return fallDamageTimeField;
+        return _fallDamageTimeField ??= typeof(CharacterMovement).GetField(
+            FieldNames.FallDamageTime,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetStaminaField()
     {
-        if (staminaField == null)
-        {
-            staminaField = typeof(CharacterData).GetField("_stam", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return staminaField;
+        return _staminaField ??= typeof(CharacterData).GetField(FieldNames.Stamina,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetMovementModifierField()
     {
-        if (movementModifierField == null)
-        {
-            movementModifierField = typeof(CharacterMovement).GetField("movementModifier", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return movementModifierField;
+        return _movementModifierField ??= typeof(CharacterMovement).GetField(
+            FieldNames.MovementModifier,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetJumpGravityField()
     {
-        if (jumpGravityField == null)
-        {
-            jumpGravityField = typeof(CharacterMovement).GetField("jumpGravity", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return jumpGravityField;
+        return _jumpGravityField ??= typeof(CharacterMovement).GetField(FieldNames.JumpGravity,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetClimbSpeedModField()
     {
-        if (climbSpeedModField == null)
-        {
-            climbSpeedModField = typeof(CharacterClimbing).GetField("climbSpeedMod", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return climbSpeedModField;
+        return _climbSpeedModField ??= typeof(CharacterClimbing).GetField(
+            FieldNames.ClimbingSpeedModifier,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetVineClimbSpeedModField()
     {
-        if (vineClimbSpeedModField == null)
-        {
-            vineClimbSpeedModField = typeof(CharacterVineClimbing).GetField("climbSpeedMod", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return vineClimbSpeedModField;
+        return _vineClimbSpeedModField ??= typeof(CharacterVineClimbing).GetField(
+            FieldNames.ClimbingSpeedModifier,
+            InstanceBindingFlags);
     }
 
     public static FieldInfo GetRopeClimbSpeedModField()
     {
-        if (ropeClimbSpeedModField == null)
-        {
-            ropeClimbSpeedModField = typeof(CharacterRopeHandling).GetField("climbSpeedMod", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return ropeClimbSpeedModField;
+        return _ropeClimbSpeedModField ??= typeof(CharacterRopeHandling).GetField(
+            FieldNames.ClimbingSpeedModifier,
+            InstanceBindingFlags);
     }
 
     public static MethodInfo GetSetStatusMethod()
     {
-        if (setStatusMethod == null)
-        {
-            setStatusMethod = typeof(CharacterAfflictions).GetMethod("SetStatus", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-        }
-        return setStatusMethod;
+        return _setStatusMethod ??= typeof(CharacterAfflictions).GetMethod(MethodNames.SetStatus,
+            InstanceBindingFlags);
     }
 
     public static System.Array GetStatusEnumValues()
     {
-        if (statusEnumValues == null)
-        {
-            statusEnumValues = System.Enum.GetValues(typeof(CharacterAfflictions.STATUSTYPE));
-        }
-        return statusEnumValues;
+        return _statusEnumValues ??= System.Enum.GetValues(typeof(CharacterAfflictions.STATUSTYPE));
     }
 
     public static void RefreshAll()
     {
-        infiniteStaminaProp = null;
-        statusLockProp = null;
-        fallDamageTimeField = null;
-        staminaField = null;
-        movementModifierField = null;
-        jumpGravityField = null;
-        climbSpeedModField = null;
-        vineClimbSpeedModField = null;
-        ropeClimbSpeedModField = null;
-        setStatusMethod = null;
-        statusEnumValues = null;
+        _infiniteStaminaProp = null;
+        _statusLockProp = null;
+        _fallDamageTimeField = null;
+        _staminaField = null;
+        _movementModifierField = null;
+        _jumpGravityField = null;
+        _climbSpeedModField = null;
+        _vineClimbSpeedModField = null;
+        _ropeClimbSpeedModField = null;
+        _setStatusMethod = null;
+        _statusEnumValues = null;
     }
 }

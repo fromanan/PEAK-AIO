@@ -1,78 +1,109 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 public static class Globals
 {
     // Boolean
-    public static bool anyAfflictionEnabled;
+    
+    public static bool AnyAfflictionEnabled;
 
     // Objects
-    public static Character character;
-    public static CharacterData characterData;
+    
+    public static Character Character;
+    
+    public static CharacterData CharacterData;
 
-    public static FieldInfo staminaField;
-    public static PropertyInfo infiniteStamProp;
+    public static FieldInfo StaminaField;
+    
+    public static PropertyInfo InfiniteStamProp;
 
-    public static FieldInfo sinceFallSlideField;
-    public static FieldInfo sinceGroundedField;
+    public static FieldInfo SinceFallSlideField;
+    
+    public static FieldInfo SinceGroundedField;
 
-    public static object movementComp;
-    public static FieldInfo movementModifierField;
-    public static FieldInfo jumpGravityField;
-    public static FieldInfo fallDamageTimeField;
+    public static object MovementComp;
+    
+    public static FieldInfo MovementModifierField;
+    
+    public static FieldInfo JumpGravityField;
+    
+    public static FieldInfo FallDamageTimeField;
 
-    public static object characterClimb;
-    public static FieldInfo climbSpeedModifierField;
+    public static object CharacterClimb;
+    
+    public static FieldInfo ClimbSpeedModifierField;
 
-    public static object characterVineClimb;
-    public static FieldInfo vineClimbSpeedModifierField;
+    public static object CharacterVineClimb;
+    
+    public static FieldInfo VineClimbSpeedModifierField;
 
-    public static object characterRopeHandling;
-    public static FieldInfo ropeClimbSpeedModifierField;
+    public static object CharacterRopeHandling;
+    
+    public static FieldInfo RopeClimbSpeedModifierField;
 
-    public static object afflictionsObj;
-    public static MethodInfo setStatusMethod;
-    public static object weightEnumValue;
-    public static object poisonEnumValue;
-    public static object hotEnumValue;
-    public static object coldEnumValue;
-    public static object curseEnumValue;
-    public static object injuryEnumValue;
-    public static object drowsyEnumValue;
-    public static object hungerEnumValue;
+    public static object AfflictionsObject;
+    
+    public static MethodInfo SetStatusMethod;
+    
+    public static object WeightEnumValue;
+    
+    public static object PoisonEnumValue;
+    
+    public static object HotEnumValue;
+    
+    public static object ColdEnumValue;
+    
+    public static object CurseEnumValue;
+    
+    public static object InjuryEnumValue;
+    
+    public static object DrowsyEnumValue;
+    
+    public static object HungerEnumValue;
 
     // Inventory
-    public static List<Item> items = new List<Item>();
-    public static List<string> itemNames = new List<string>();
-    public static int[] selectedItems = new int[] { -1, -1, -1 };
-    public static string[] itemDisplayNames = new string[] { "None", "None", "None" };
-    public static string[] itemSearchBuffers = new string[3];
+    
+    public static readonly List<Item> Items = new();
+    
+    public static readonly List<string> ItemNames = new();
+    
+    public static readonly int[] SelectedItems = { -1, -1, -1 };
+    
+    public static string[] ItemDisplayNames = { "None", "None", "None" };
+    
+    public static string[] ItemSearchBuffers = new string[3];
 
     // Player
-    public static Player playerObj;
+    
+    public static Player PlayerObject;
 
     // Lobby
-    public static List<Character> allPlayers = new List<Character>();
-    public static List<string> playerNames = new List<string>();
-    public static int selectedPlayer = -1;
-    public static bool excludeSelfFromAllActions = true;
+    
+    public static readonly List<Character> AllPlayers = new();
+    
+    public static readonly List<string> PlayerNames = new();
+    
+    public static int SelectedPlayer = -1;
+    
+    public static bool ExcludeSelfFromAllActions = true;
 
     // Teleport
-    public static bool teleportToPingEnabled = false;
-    public static float teleportX = 0f;
-    public static float teleportY = 0f;
-    public static float teleportZ = 0f;
+    
+    public static bool TeleportToPingEnabled = false;
+    
+    public static float TeleportX = 0f;
+    
+    public static float TeleportY = 0f;
+    
+    public static float TeleportZ = 0f;
 
     // World
-    public static int selectedLuggageIndex = -1;
-    public static List<string> luggageLabels = new List<string>();
-    public static List<Luggage> luggageObject = new List<Luggage>();
-    public static List<Luggage> allOpenedLuggage = new List<Luggage>();
-
+    
+    public static int SelectedLuggageIndex = -1;
+    
+    public static readonly List<string> LuggageLabels = new();
+    
+    public static readonly List<Luggage> LuggageObjects = new();
+    
+    public static List<Luggage> AllOpenedLuggage = new();
 }

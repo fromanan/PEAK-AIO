@@ -1,6 +1,5 @@
 ﻿using BepInEx.Logging;
 using BepInEx.Configuration;
-using UnityEngine;
 
 public static class ConfigManager
 {
@@ -70,9 +69,12 @@ public static class ConfigManager
         RopeClimbAmount = config.Bind("Character", "RopeClimbAmount", 1.0f);
 
         // Inventory 
-        RechargeAmountSlot1 = config.Bind("Inventory", "RechargeAmountSlot1", 100f, new ConfigDescription("Recharge amount for slot 1", new AcceptableValueRange<float>(0f, 999f)));
-        RechargeAmountSlot2 = config.Bind("Inventory", "RechargeAmountSlot2", 100f, new ConfigDescription("Recharge amount for slot 2", new AcceptableValueRange<float>(0f, 999f)));
-        RechargeAmountSlot3 = config.Bind("Inventory", "RechargeAmountSlot3", 100f, new ConfigDescription("Recharge amount for slot 3", new AcceptableValueRange<float>(0f, 999f)));
+        RechargeAmountSlot1 = config.Bind("Inventory", "RechargeAmountSlot1", 100f,
+            new ConfigDescription("Recharge amount for slot 1", new AcceptableValueRange<float>(0f, 999f)));
+        RechargeAmountSlot2 = config.Bind("Inventory", "RechargeAmountSlot2", 100f,
+            new ConfigDescription("Recharge amount for slot 2", new AcceptableValueRange<float>(0f, 999f)));
+        RechargeAmountSlot3 = config.Bind("Inventory", "RechargeAmountSlot3", 100f,
+            new ConfigDescription("Recharge amount for slot 3", new AcceptableValueRange<float>(0f, 999f)));
 
         Logger.LogInfo("[PEAK AIO][ConfigManager] Config Loaded.");
     }
