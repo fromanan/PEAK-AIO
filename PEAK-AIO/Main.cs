@@ -11,6 +11,8 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using Photon.Pun;
 using System.Collections.Generic;
+using Vector4 = System.Numerics.Vector4;
+using Vector2 = System.Numerics.Vector2;
 
 [BepInDependency(DearImGuiInjection.Metadata.GUID)]
 [BepInPlugin("com.onigremlin.peakaio", "PEAK AIO Mod", "1.0.2")]
@@ -26,17 +28,17 @@ public class PeakMod : BaseUnityPlugin
         var style = ImGui.GetStyle();
         var colors = style.Colors;
 
-        var canvasTan = new System.Numerics.Vector4(0.953f, 0.941f, 0.902f, 1.00f);
-        var badgeBrown = new System.Numerics.Vector4(0.361f, 0.294f, 0.231f, 1.00f);
-        var logInk = new System.Numerics.Vector4(0.18f, 0.18f, 0.18f, 1.00f);
-        var sidebarGreen = new System.Numerics.Vector4(0.18f, 0.28f, 0.22f, 1.00f);
-        var trailDust = new System.Numerics.Vector4(0.866f, 0.827f, 0.741f, 1.00f);
-        var trailDustHover = new System.Numerics.Vector4(0.80f, 0.78f, 0.65f, 1.00f);
-        var trailDustActive = new System.Numerics.Vector4(0.75f, 0.72f, 0.61f, 1.00f);
-        var ropeBrown = new System.Numerics.Vector4(0.55f, 0.42f, 0.28f, 1.00f);
-        var softRed = new System.Numerics.Vector4(0.75f, 0.6f, 0.5f, 1.00f);
-        var scoutRed = new System.Numerics.Vector4(0.76f, 0.44f, 0.39f, 1.00f);
-        var lightGreen = new System.Numerics.Vector4(0.318f, 0.569f, 0.384f, 1.0f);
+        var canvasTan = new Vector4(0.953f, 0.941f, 0.902f, 1.00f);
+        var badgeBrown = new Vector4(0.361f, 0.294f, 0.231f, 1.00f);
+        var logInk = new Vector4(0.18f, 0.18f, 0.18f, 1.00f);
+        var sidebarGreen = new Vector4(0.18f, 0.28f, 0.22f, 1.00f);
+        var trailDust = new Vector4(0.866f, 0.827f, 0.741f, 1.00f);
+        var trailDustHover = new Vector4(0.80f, 0.78f, 0.65f, 1.00f);
+        var trailDustActive = new Vector4(0.75f, 0.72f, 0.61f, 1.00f);
+        var ropeBrown = new Vector4(0.55f, 0.42f, 0.28f, 1.00f);
+        var softRed = new Vector4(0.75f, 0.6f, 0.5f, 1.00f);
+        var scoutRed = new Vector4(0.76f, 0.44f, 0.39f, 1.00f);
+        var lightGreen = new Vector4(0.318f, 0.569f, 0.384f, 1.0f);
 
         colors[(int)ImGuiCol.WindowBg] = canvasTan;
         colors[(int)ImGuiCol.Border] = logInk;
@@ -68,13 +70,13 @@ public class PeakMod : BaseUnityPlugin
 
         colors[(int)ImGuiCol.ScrollbarBg] = badgeBrown;
         colors[(int)ImGuiCol.ScrollbarGrab] = sidebarGreen;
-        colors[(int)ImGuiCol.ScrollbarGrabHovered] = new System.Numerics.Vector4(
+        colors[(int)ImGuiCol.ScrollbarGrabHovered] = new Vector4(
             sidebarGreen.X + 0.1f,
             sidebarGreen.Y + 0.1f,
             sidebarGreen.Z + 0.1f,
             1.0f
         );
-        colors[(int)ImGuiCol.ScrollbarGrabActive] = new System.Numerics.Vector4(
+        colors[(int)ImGuiCol.ScrollbarGrabActive] = new Vector4(
             sidebarGreen.X - 0.05f,
             sidebarGreen.Y - 0.05f,
             sidebarGreen.Z - 0.05f,
@@ -82,7 +84,7 @@ public class PeakMod : BaseUnityPlugin
         );
 
         colors[(int)ImGuiCol.SliderGrab] = sidebarGreen;
-        colors[(int)ImGuiCol.SliderGrabActive] = new System.Numerics.Vector4(
+        colors[(int)ImGuiCol.SliderGrabActive] = new Vector4(
             sidebarGreen.X - 0.05f,
             sidebarGreen.Y - 0.05f,
             sidebarGreen.Z - 0.05f,
@@ -94,10 +96,10 @@ public class PeakMod : BaseUnityPlugin
         style.ChildRounding = 4f;
         style.FrameBorderSize = 1.0f;
         style.GrabRounding = 4f;
-        style.WindowPadding = new System.Numerics.Vector2(4, 4);
-        style.CellPadding = new System.Numerics.Vector2(4, 4);
+        style.WindowPadding = new Vector2(4, 4);
+        style.CellPadding = new Vector2(4, 4);
         style.FrameBorderSize = 1.0f;
-        style.ItemSpacing = new System.Numerics.Vector2(2, 4);
+        style.ItemSpacing = new Vector2(2, 4);
     }
     private void Awake()
     {
@@ -162,8 +164,8 @@ public class PeakMod : BaseUnityPlugin
         {
             var pos = ImGui.GetItemRectMin();
             ImGui.SameLine();
-            ImGui.SetCursorScreenPos(pos + new System.Numerics.Vector2(4, 2));
-            ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.18f, 0.18f, 0.18f, 1.00f));
+            ImGui.SetCursorScreenPos(pos + new Vector2(4, 2));
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
             ImGui.TextUnformatted("Search items...");
             ImGui.PopStyleColor();
         }
@@ -199,8 +201,8 @@ public class PeakMod : BaseUnityPlugin
 
         if (ImGui.IsItemHovered())
         {
-            ImGui.PushStyleColor(ImGuiCol.PopupBg, new System.Numerics.Vector4(0.89f, 0.82f, 0.70f, 1.0f));
-            ImGui.PushStyleColor(ImGuiCol.Text, new System.Numerics.Vector4(0.18f, 0.18f, 0.18f, 1.00f));
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, new Vector4(0.89f, 0.82f, 0.70f, 1.0f));
+            ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.18f, 0.18f, 0.18f, 1.00f));
             ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1.0f);
 
             ImGui.BeginTooltip();
@@ -229,14 +231,14 @@ public class PeakMod : BaseUnityPlugin
             }
 
             // Set window position and size
-            ImGui.SetNextWindowPos(new System.Numerics.Vector2(20, 20), ImGuiCond.Once);
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(500, 300), ImGuiCond.Once);
+            ImGui.SetNextWindowPos(new Vector2(20, 20), ImGuiCond.Once);
+            ImGui.SetNextWindowSize(new Vector2(500, 300), ImGuiCond.Once);
 
             if (ImGui.Begin("PEAK AIO##Main", ImGuiWindowFlags.NoCollapse))
             {
                 // Sidebar
-                ImGui.BeginChild("Sidebar", new System.Numerics.Vector2(85, 0), true);
-                ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                ImGui.BeginChild("Sidebar", new Vector2(85, 0), true);
+                ImGui.Dummy(new Vector2(4, 2));
                 string[] sidebarItems = { "PLAYER", "ITEMS", "LOBBY", "WORLD", "ABOUT" };
                 for (int i = 0; i < sidebarItems.Length; i++)
                 {
@@ -244,8 +246,8 @@ public class PeakMod : BaseUnityPlugin
                     string label = sidebarItems[i];
 
                     var textColor = isSelected
-                        ? new System.Numerics.Vector4(0.318f, 0.569f, 0.384f, 1.0f)
-                        : new System.Numerics.Vector4(0.18f, 0.18f, 0.18f, 1.00f);
+                        ? new Vector4(0.318f, 0.569f, 0.384f, 1.0f)
+                        : new Vector4(0.18f, 0.18f, 0.18f, 1.00f);
 
                     ImGui.PushStyleColor(ImGuiCol.Text, textColor);
 
@@ -272,10 +274,10 @@ public class PeakMod : BaseUnityPlugin
                     float fullWidth = ImGui.GetContentRegionAvail().X;
                     float halfWidth = fullWidth / 2f;
 
-                    ImGui.BeginChild("PlayerColumn", new System.Numerics.Vector2(halfWidth, 0), true);
+                    ImGui.BeginChild("PlayerColumn", new Vector2(halfWidth, 0), true);
                     ImGui.Indent(4.0f);
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - 4);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
                     if (ImGui.CollapsingHeader("Self Mods##SelfMods", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         DrawCheckbox(ConfigManager.InfiniteStamina, "Infinite Stamina", (val) =>
@@ -379,9 +381,9 @@ public class PeakMod : BaseUnityPlugin
                     ImGui.EndChild();
                     ImGui.Unindent();
                     ImGui.SameLine();
-                    ImGui.BeginChild("PlayerDetailsColumn", new System.Numerics.Vector2(halfWidth - 10, 0), true);
+                    ImGui.BeginChild("PlayerDetailsColumn", new Vector2(halfWidth - 10, 0), true);
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
                     if (ImGui.CollapsingHeader("Details", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         if (ConfigManager.JumpMod.Value)
@@ -436,7 +438,7 @@ public class PeakMod : BaseUnityPlugin
                     List<(int slot, int itemIndex)> assignQueue = new List<(int slot, int itemIndex)>();
 
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
 
                     ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - 4);
                     if (ImGui.BeginTable("InventorySlots", 3, ImGuiTableFlags.Borders | ImGuiTableFlags.RowBg))
@@ -520,7 +522,7 @@ public class PeakMod : BaseUnityPlugin
                         Utilities.AssignInventoryItem(slot, itemIndex);
                     }
 
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
                     if (ImGui.Button("Refresh Item List"))
                         Utilities.UpdateItems();
                     ImGui.SameLine();
@@ -540,9 +542,9 @@ public class PeakMod : BaseUnityPlugin
                     }
 
                     // Left: Player List
-                    ImGui.BeginChild("Lobby_PlayerList", new System.Numerics.Vector2(halfWidth, 0), true);
+                    ImGui.BeginChild("Lobby_PlayerList", new Vector2(halfWidth, 0), true);
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
                     if (ImGui.CollapsingHeader("Lobby Players", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - 4);
@@ -565,7 +567,7 @@ public class PeakMod : BaseUnityPlugin
                             }
                             ImGui.EndCombo();
                         }
-                        ImGui.Dummy(new System.Numerics.Vector2(4, 4));
+                        ImGui.Dummy(new Vector2(4, 4));
                         ImGui.Separator();
                         ImGui.Text("All Players");
 
@@ -586,7 +588,7 @@ public class PeakMod : BaseUnityPlugin
                             Utilities.WarpAllPlayersToMe();
                     }
 
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
                     if (ImGui.Button("Refresh Players List"))
                         Utilities.RefreshPlayerList();
                     ImGui.SameLine();
@@ -597,9 +599,9 @@ public class PeakMod : BaseUnityPlugin
 
                     // Right: Player Actions
                     ImGui.SameLine();
-                    ImGui.BeginChild("Lobby_PlayerActions", new System.Numerics.Vector2(halfWidth - 10, 0), true);
+                    ImGui.BeginChild("Lobby_PlayerActions", new Vector2(halfWidth - 10, 0), true);
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(0, 4));
+                    ImGui.Dummy(new Vector2(0, 4));
                     if (ImGui.CollapsingHeader("Actions", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         if (Globals.selectedPlayer >= 0 && Globals.selectedPlayer < Globals.allPlayers.Count)
@@ -618,7 +620,7 @@ public class PeakMod : BaseUnityPlugin
                             if (ImGui.Button("Warp To Me"))
                                 Utilities.WarpSelectedPlayerToMe();
 
-                            ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                            ImGui.Dummy(new Vector2(4, 2));
                             ImGui.Separator();
                             ImGui.Text("Special Actions");
 
@@ -647,9 +649,9 @@ public class PeakMod : BaseUnityPlugin
                     Utilities.EnsureLuggageListInitialized();
 
                     // Left: Luggage List
-                    ImGui.BeginChild("World_LuggageList", new System.Numerics.Vector2(halfWidth, 0), true);
+                    ImGui.BeginChild("World_LuggageList", new Vector2(halfWidth, 0), true);
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
 
                     if (ImGui.CollapsingHeader("Containers", ImGuiTreeNodeFlags.DefaultOpen))
                     {
@@ -684,7 +686,7 @@ public class PeakMod : BaseUnityPlugin
                             ImGui.EndCombo();
                         }
 
-                        ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                        ImGui.Dummy(new Vector2(4, 2));
                         if (ImGui.Button("Refresh Luggage List"))
                         {
                             Utilities.hasInitializedLuggageList = false;
@@ -693,7 +695,7 @@ public class PeakMod : BaseUnityPlugin
                         ImGui.SameLine();
                         DrawToolTip("Reloads the list of luggage within 300m of your position.");
 
-                        ImGui.Dummy(new System.Numerics.Vector2(4, 4));
+                        ImGui.Dummy(new Vector2(4, 4));
                         ImGui.Separator();
                         ImGui.Text("All Nearby Containers");
 
@@ -708,9 +710,9 @@ public class PeakMod : BaseUnityPlugin
 
                     // Right: Luggage Actions
                     ImGui.SameLine();
-                    ImGui.BeginChild("World_LuggageActions", new System.Numerics.Vector2(halfWidth - 10, 0), true);
+                    ImGui.BeginChild("World_LuggageActions", new Vector2(halfWidth - 10, 0), true);
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(0, 4));
+                    ImGui.Dummy(new Vector2(0, 4));
 
                     if (ImGui.CollapsingHeader("Actions", ImGuiTreeNodeFlags.DefaultOpen))
                     {
@@ -745,7 +747,7 @@ public class PeakMod : BaseUnityPlugin
                 else if (selectedTab == 5)
                 {
                     ImGui.Indent(4.0f);
-                    ImGui.Dummy(new System.Numerics.Vector2(4, 2));
+                    ImGui.Dummy(new Vector2(4, 2));
 
                     ImGui.Text("PEAK AIO Mod");
                     ImGui.Separator();
