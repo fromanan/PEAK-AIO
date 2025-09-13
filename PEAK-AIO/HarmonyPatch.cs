@@ -31,14 +31,14 @@ public class PointPingPatch
 [HarmonyPatch(typeof(Character), "Update")]
 public class FlyPatch
 {
-    private static Vector3 flyVelocity = Vector3.zero;
+    private static Vector3 _flyVelocity = Vector3.zero;
     
     public static bool IsFlying { get; private set; }
 
     public static void SetFlying(bool enable)
     {
         IsFlying = enable;
-        flyVelocity = Vector3.zero;
+        _flyVelocity = Vector3.zero;
 
         ConfigManager.Logger.LogInfo($"[FlyMod] Flight {(enable ? "enabled" : "disabled")}.");
     }
@@ -53,7 +53,7 @@ public class FlyPatch
             if (!IsFlying)
                 return;
             IsFlying = false;
-            flyVelocity = Vector3.zero;
+            _flyVelocity = Vector3.zero;
             ConfigManager.Logger.LogInfo("[FlyMod] Flight disabled.");
             return;
         }
@@ -86,13 +86,13 @@ public class FlyPatch
         float speed = ConfigManager.FlySpeed.Value;
         float accel = ConfigManager.FlyAcceleration.Value;
 
-        flyVelocity = Vector3.Lerp(flyVelocity, moveVec.normalized * speed, Time.deltaTime * accel);
+        _flyVelocity = Vector3.Lerp(_flyVelocity, moveVec.normalized * speed, Time.deltaTime * accel);
 
         foreach (Bodypart part in __instance.refs.ragdoll.partList)
         {
             if (part?.Rig is { } rigidbody)
             {
-                rigidbody.linearVelocity = flyVelocity;
+                rigidbody.linearVelocity = _flyVelocity;
             }
         }
     }

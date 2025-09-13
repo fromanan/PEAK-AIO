@@ -188,7 +188,7 @@ public class PeakMod : BaseUnityPlugin
             ImGui.PopStyleColor();
         }
 
-        if (ImGui.BeginCombo(label, selectedIndex >= 0 && selectedIndex < items.Count ? items[selectedIndex] : "None"))
+        if (ImGui.BeginCombo(label, selectedIndex >= 0 && selectedIndex < items.Count ? items[selectedIndex] : Globals.None))
         {
             for (int i = 0; i < items.Count; i++)
             {
@@ -307,9 +307,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.InfiniteStamina, "Infinite Stamina", (val) =>
                             {
                                 var character = GameHelpers.GetCharacter();
-                                var prop = ConstantFields.GetInfiniteStaminaProperty();
+                                var prop = ConstantFields.InfiniteStaminaProperty;
                                 if (character && prop is not null)
+                                {
                                     prop.SetValue(character, val);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Prevents stamina from decreasing, allowing unlimited sprinting and actions.");
@@ -317,9 +319,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.LockStatus, "Freeze Afflictions", (val) =>
                             {
                                 var character = GameHelpers.GetCharacter();
-                                var prop = ConstantFields.GetStatusLockProperty();
+                                var prop = ConstantFields.StatusLockProperty;
                                 if (character && prop is not null)
+                                {
                                     prop.SetValue(character, val);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Prevents your statuses from changing.");
@@ -331,9 +335,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.SpeedMod, "Change Speed", (val) =>
                             {
                                 var movement = GameHelpers.GetMovementComponent();
-                                var field = ConstantFields.GetMovementModifierField();
+                                var field = ConstantFields.MovementModifierField;
                                 if (movement && field is not null)
+                                {
                                     field.SetValue(movement, ConfigManager.SpeedAmount.Value);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Overrides your character's movement speed with a custom multiplier.");
@@ -341,12 +347,16 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.JumpMod, "Change Jump", (val) =>
                             {
                                 var movement = GameHelpers.GetMovementComponent();
-                                var jumpField = ConstantFields.GetJumpGravityField();
-                                var fallField = ConstantFields.GetFallDamageTimeField();
+                                var jumpField = ConstantFields.JumpGravityField;
+                                var fallField = ConstantFields.FallDamageTimeField;
                                 if (movement && jumpField is not null)
+                                {
                                     jumpField.SetValue(movement, ConfigManager.JumpAmount.Value);
+                                }
                                 if (movement && fallField is not null)
+                                {
                                     fallField.SetValue(movement, ConfigManager.NoFallDmg.Value ? 999f : 1.5f);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip(
@@ -355,9 +365,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.ClimbMod, "Change Climb", (val) =>
                             {
                                 var climb = GameHelpers.GetClimbingComponent();
-                                var field = ConstantFields.GetClimbSpeedModField();
+                                var field = ConstantFields.ClimbSpeedModField;
                                 if (climb && field is not null)
+                                {
                                     field.SetValue(climb, ConfigManager.ClimbAmount.Value);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Adjusts the speed at which you climb ladders and surfaces.");
@@ -365,9 +377,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.VineClimbMod, "Change Vine Climb", (val) =>
                             {
                                 var vine = GameHelpers.GetVineClimbComponent();
-                                var field = ConstantFields.GetVineClimbSpeedModField();
+                                var field = ConstantFields.VineClimbSpeedModField;
                                 if (vine && field is not null)
+                                {
                                     field.SetValue(vine, ConfigManager.VineClimbAmount.Value);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Changes climbing speed specifically for vines.");
@@ -375,9 +389,11 @@ public class PeakMod : BaseUnityPlugin
                             DrawCheckbox(ConfigManager.RopeClimbMod, "Change Rope Climb", (val) =>
                             {
                                 var rope = GameHelpers.GetRopeClimbComponent();
-                                var field = ConstantFields.GetRopeClimbSpeedModField();
+                                var field = ConstantFields.RopeClimbSpeedModField;
                                 if (rope && field is not null)
+                                {
                                     field.SetValue(rope, ConfigManager.RopeClimbAmount.Value);
+                                }
                             });
                             ImGui.SameLine();
                             DrawToolTip("Modifies climbing speed when using ropes or rope-based obstacles.");
@@ -492,7 +508,7 @@ public class PeakMod : BaseUnityPlugin
                                 ImGui.TableSetColumnIndex(slot);
                                 ImGui.PushID(slot); // Single PushID per slot
 
-                                var currentItemName = "None";
+                                var currentItemName = Globals.None;
 
                                 if (Player.localPlayer?.itemSlots is not null &&
                                     Player.localPlayer.itemSlots.Length > slot &&
@@ -594,7 +610,7 @@ public class PeakMod : BaseUnityPlugin
                             if (ImGui.BeginCombo("Select Player",
                                     Globals.SelectedPlayer >= 0 && Globals.SelectedPlayer < Globals.PlayerNames.Count
                                         ? Globals.PlayerNames[Globals.SelectedPlayer]
-                                        : "None"))
+                                        : Globals.None))
                             {
                                 for (int i = 0; i < Globals.PlayerNames.Count; i++)
                                 {
@@ -725,7 +741,7 @@ public class PeakMod : BaseUnityPlugin
                             string selectedLabel = Globals.SelectedLuggageIndex >= 0 &&
                                                    Globals.SelectedLuggageIndex < Globals.LuggageLabels.Count
                                 ? Globals.LuggageLabels[Globals.SelectedLuggageIndex]
-                                : "None";
+                                : Globals.None;
 
                             if (ImGui.BeginCombo("Select Container", selectedLabel))
                             {
@@ -858,7 +874,7 @@ public class PeakMod : BaseUnityPlugin
         }
         catch (Exception ex)
         {
-            ConfigManager.Logger.LogError("[UI ERROR] Exception in MyUI: " + ex);
+            ConfigManager.Logger.LogError($"[UI ERROR] Exception in MyUI: {ex}");
         }
     }
 

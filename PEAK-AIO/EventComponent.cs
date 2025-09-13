@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using static ConfigManager;
+using static ConstantFields;
 
 public class EventComponent : MonoBehaviour
 {
@@ -61,48 +63,48 @@ public class EventComponent : MonoBehaviour
     {
         if (Movement is not null)
         {
-            if (ConfigManager.SpeedMod.Value)
+            if (SpeedMod.Value)
             {
-                ConstantFields.GetMovementModifierField()?.SetValue(Movement, ConfigManager.SpeedAmount.Value);
+                MovementModifierField?.SetValue(Movement, SpeedAmount.Value);
             }
 
-            if (ConfigManager.JumpMod.Value)
+            if (JumpMod.Value)
             {
-                ConstantFields.GetJumpGravityField()?.SetValue(Movement, ConfigManager.JumpAmount.Value);
+                JumpGravityField?.SetValue(Movement, JumpAmount.Value);
 
-                if (ConfigManager.NoFallDmg.Value)
+                if (NoFallDmg.Value)
                 {
-                    ConstantFields.GetFallDamageTimeField()?.SetValue(Movement, 999f);
+                    FallDamageTimeField?.SetValue(Movement, 999f);
                 }
             }
         }
 
         if (Character is not null)
         {
-            if (ConfigManager.InfiniteStamina.Value)
+            if (InfiniteStamina.Value)
             {
-                ConstantFields.GetInfiniteStaminaProperty()?.SetValue(Character, true);
+                InfiniteStaminaProperty?.SetValue(Character, true);
             }
 
-            if (ConfigManager.LockStatus.Value)
+            if (LockStatus.Value)
             {
-                ConstantFields.GetStatusLockProperty()?.SetValue(Character, true);
+                StatusLockProperty?.SetValue(Character, true);
             }
         }
 
-        if (Climb is not null && ConfigManager.ClimbMod.Value)
+        if (Climb is not null && ClimbMod.Value)
         {
-            ConstantFields.GetClimbSpeedModField()?.SetValue(Climb, ConfigManager.ClimbAmount.Value);
+            ClimbSpeedModField?.SetValue(Climb, ClimbAmount.Value);
         }
 
-        if (Vine is not null && ConfigManager.VineClimbMod.Value)
+        if (Vine is not null && VineClimbMod.Value)
         {
-            ConstantFields.GetVineClimbSpeedModField()?.SetValue(Vine, ConfigManager.VineClimbAmount.Value);
+            VineClimbSpeedModField?.SetValue(Vine, VineClimbAmount.Value);
         }
 
-        if (Rope is not null && ConfigManager.RopeClimbMod.Value)
+        if (Rope is not null && RopeClimbMod.Value)
         {
-            ConstantFields.GetRopeClimbSpeedModField()?.SetValue(Rope, ConfigManager.RopeClimbAmount.Value);
+            RopeClimbSpeedModField?.SetValue(Rope, RopeClimbAmount.Value);
         }
     }
 }

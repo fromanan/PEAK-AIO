@@ -69,7 +69,7 @@ public static class Globals
     
     public static readonly int[] SelectedItems = { -1, -1, -1 };
     
-    public static string[] ItemDisplayNames = { "None", "None", "None" };
+    public static string[] ItemDisplayNames = { None, None, None };
     
     public static string[] ItemSearchBuffers = new string[3];
 
@@ -106,4 +106,8 @@ public static class Globals
     public static readonly List<Luggage> LuggageObjects = new();
     
     public static List<Luggage> AllOpenedLuggage = new();
+    
+    // Constants
+
+    public const string None = "None";
 }
