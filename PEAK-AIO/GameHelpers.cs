@@ -1,86 +1,107 @@
-﻿using System.Reflection;
+﻿#nullable enable
+
+using UnityEngine;
 
 internal static class GameHelpers
 {
-    private static Character character;
-    private static CharacterData characterData;
-    private static CharacterMovement movementComponent;
-    private static CharacterAfflictions afflictionsComponent;
-    private static CharacterClimbing climbingComponent;
-    private static CharacterVineClimbing vineClimbingComponent;
-    private static CharacterRopeHandling ropeClimbingComponent;
+    private static Character? _character;
+    
+    private static CharacterData? _characterData;
+    
+    private static CharacterMovement? _movementComponent;
+    
+    private static CharacterAfflictions? _afflictionsComponent;
+    
+    private static CharacterClimbing? _climbingComponent;
+    
+    private static CharacterVineClimbing? _vineClimbingComponent;
+    
+    private static CharacterRopeHandling? _ropeClimbingComponent;
 
-    public static Character GetCharacterComponent()
+    // ReSharper disable Unity.PerformanceAnalysis
+    private static T? GetCharacterComponent<T>() where T : Component
     {
-        if (character == null || !character.isActiveAndEnabled)
-        {
-            character = Character.localCharacter;
-        }
-        return character;
+        return GetCharacter()?.GetComponent<T>();
     }
 
-    public static CharacterData GetCharacterData()
+    public static Character? GetCharacter()
     {
-        if (characterData == null || !characterData.isActiveAndEnabled)
+        if (_character is null || !_character.isActiveAndEnabled)
         {
-            characterData = UnityEngine.Object.FindFirstObjectByType<CharacterData>();
+            _character = Character.localCharacter;
         }
-        return characterData;
+
+        return _character;
     }
 
-    public static CharacterMovement GetMovementComponent()
+    public static CharacterData? GetCharacterData()
     {
-        if (movementComponent == null || !movementComponent.isActiveAndEnabled)
+        if (_characterData is null || !_characterData.isActiveAndEnabled)
         {
-            movementComponent = GetCharacterComponent()?.GetComponent<CharacterMovement>();
+            _characterData = Object.FindFirstObjectByType<CharacterData>();
         }
-        return movementComponent;
+
+        return _characterData;
     }
 
-    public static CharacterAfflictions GetAfflictionsComponent()
+    public static CharacterMovement? GetMovementComponent()
     {
-        if (afflictionsComponent == null || !afflictionsComponent.isActiveAndEnabled)
+        if (_movementComponent is null || !_movementComponent.isActiveAndEnabled)
         {
-            afflictionsComponent = GetCharacterComponent()?.GetComponent<CharacterAfflictions>();
+            _movementComponent = GetCharacterComponent<CharacterMovement>();
         }
-        return afflictionsComponent;
+
+        return _movementComponent;
     }
 
-    public static CharacterClimbing GetClimbingComponent()
+    public static CharacterAfflictions? GetAfflictionsComponent()
     {
-        if (climbingComponent == null || !climbingComponent.isActiveAndEnabled)
+        if (_afflictionsComponent is null || !_afflictionsComponent.isActiveAndEnabled)
         {
-            climbingComponent = GetCharacterComponent()?.GetComponent<CharacterClimbing>();
+            _afflictionsComponent = GetCharacterComponent<CharacterAfflictions>();
         }
-        return climbingComponent;
+
+        return _afflictionsComponent;
     }
 
-    public static CharacterVineClimbing GetVineClimbComponent()
+    public static CharacterClimbing? GetClimbingComponent()
     {
-        if (vineClimbingComponent == null || !vineClimbingComponent.isActiveAndEnabled)
+        if (_climbingComponent is null || !_climbingComponent.isActiveAndEnabled)
         {
-            vineClimbingComponent = GetCharacterComponent()?.GetComponent<CharacterVineClimbing>();
+            _climbingComponent = GetCharacterComponent<CharacterClimbing>();
         }
-        return vineClimbingComponent;
+
+        return _climbingComponent;
     }
 
-    public static CharacterRopeHandling GetRopeClimbComponent()
+    public static CharacterVineClimbing? GetVineClimbComponent()
     {
-        if (ropeClimbingComponent == null || !ropeClimbingComponent.isActiveAndEnabled)
+        if (_vineClimbingComponent is null || !_vineClimbingComponent.isActiveAndEnabled)
         {
-            ropeClimbingComponent = GetCharacterComponent()?.GetComponent<CharacterRopeHandling>();
+            _vineClimbingComponent = GetCharacterComponent<CharacterVineClimbing>();
         }
-        return ropeClimbingComponent;
+
+        return _vineClimbingComponent;
+    }
+
+    public static CharacterRopeHandling? GetRopeClimbComponent()
+    {
+        if (_ropeClimbingComponent is null || !_ropeClimbingComponent.isActiveAndEnabled)
+        {
+            _ropeClimbingComponent = GetCharacterComponent<CharacterRopeHandling>();
+        }
+
+        return _ropeClimbingComponent;
     }
 
     public static void Refresh()
     {
-        character = null;
-        characterData = null;
-        movementComponent = null;
-        afflictionsComponent = null;
-        climbingComponent = null;
-        vineClimbingComponent = null;
-        ropeClimbingComponent = null;
+        _character = null;
+        _characterData = null;
+        _movementComponent = null;
+        _afflictionsComponent = null;
+        _climbingComponent = null;
+        _vineClimbingComponent = null;
+        _ropeClimbingComponent = null;
     }
 }

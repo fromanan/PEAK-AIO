@@ -50,3 +50,17 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# IDE folders
+.vs
+.idea
+
+# IDE files
+**.sln.DotSettings.user
+
+# Binaries
+[Bb]in/
+[Oo]bj/
+
+# Nuget
+packages/
